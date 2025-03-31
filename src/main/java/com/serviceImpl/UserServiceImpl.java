@@ -1,22 +1,28 @@
 package com.serviceImpl;
 
+import com.entity.AuthAuditEvent;
 import com.entity.User;
 import com.repository.UserRepository;
 import com.services.UserService;
+import com.streamService.AuthLogProducer;
 import com.util.PasswordUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
-    PasswordUtils passwordUtils;
+    private PasswordUtils passwordUtils;
+
+    @Autowired
+    private AuthLogProducer authLogProducer;
 
     @Override
     public  String register( String email, String password, String fullName) {
@@ -50,7 +56,14 @@ public class UserServiceImpl implements UserService {
             User res = response.get();
             System.out.println("password : "+password+"  repo : "+res.getPassword());
             if (passwordUtils.verifyHashedPassword(password,res.getPassword())){
+                AuthAuditEvent event = new AuthAuditEvent(email, LocalDateTime.now(),"Success","KumarLaptop","testing");
+                authLogProducer.sendAuditEvent(event);
                 return "Success in login";
+            }
+            else{
+                AuthAuditEvent event = new AuthAuditEvent(email, LocalDateTime.now(),"Failure","KumarLaptop","testing");
+                authLogProducer.sendAuditEvent(event);
+
             }
         }
         catch (Exception ex){
