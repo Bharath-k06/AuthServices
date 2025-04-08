@@ -4,9 +4,8 @@ package com.controller;
 import com.entity.User;
 import com.exception.CustomException;
 import com.services.UserService;
+import com.util.JwtSecurityConfig;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,26 +14,30 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
-import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/api")
 @CrossOrigin
 public class RegisterUser {
+    private JwtSecurityConfig jwtUtil = null;
+
+    public RegisterUser(JwtSecurityConfig jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
 
     @Autowired
     UserService userService;
 
-    @Operation(summary = "Login endpoint for logging in", responses = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
-            @ApiResponse(responseCode = "404", description = "Resource not found")
-    })
+
     @PostMapping("/login")
-    String loginUser(@RequestBody User obj){
-        String res = userService.login(obj.getEmail(), obj.getPassword());
-        return res;
+    public ResponseEntity<String> login(@RequestBody User request){
+        String res = userService.login(request.getEmail(), request.getPassword());
+        if (res.equalsIgnoreCase("Success in login")) {
+            String token = jwtUtil.generateToken(request.getFullName());
+            return new ResponseEntity<>(token,HttpStatus.OK);
+        }
+        return new ResponseEntity<>("Success",HttpStatus.OK);
     }
 
     @Operation(summary = "Register controller for registering", responses = {
