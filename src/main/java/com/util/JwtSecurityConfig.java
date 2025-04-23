@@ -21,8 +21,8 @@ public class JwtSecurityConfig {
         return Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateToken(String userName){
-        return Jwts.builder().setSubject(userName).setIssuedAt(new Date()).setExpiration(new Date(System.currentTimeMillis()+EXPIRATION))
+    public String generateToken(){
+        return Jwts.builder().setIssuedAt(new Date()).setExpiration(new Date(System.currentTimeMillis()+EXPIRATION))
                 .signWith(getSigningKey()).compact();
     }
 

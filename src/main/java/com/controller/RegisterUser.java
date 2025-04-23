@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import static com.util.UtilConstants.USER_NAME_JWT;
+
 
 @RestController
 @RequestMapping("/api")
@@ -29,14 +31,16 @@ public class RegisterUser {
     @Autowired
     UserService userService;
 
+    @PostMapping("/getJwtToken")
+    private ResponseEntity<String>getJwtToken(){
+        String token = jwtUtil.generateToken();
+        return new ResponseEntity<>(token,HttpStatus.OK);
+    }
+
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody User request){
         String res = userService.login(request.getEmail(), request.getPassword());
-        if (res.equalsIgnoreCase("Success in login")) {
-            String token = jwtUtil.generateToken(request.getFullName());
-            return new ResponseEntity<>(token,HttpStatus.OK);
-        }
         return new ResponseEntity<>("Success",HttpStatus.OK);
     }
 

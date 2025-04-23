@@ -13,6 +13,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Collections;
 
+import static com.util.UtilConstants.USER_NAME_JWT;
+
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
@@ -37,9 +39,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(7);
         if (jwtUtil.validateToken(token)) {
-            String username = jwtUtil.getUserName(token);
             UsernamePasswordAuthenticationToken authToken =
-                    new UsernamePasswordAuthenticationToken(username, null, Collections.emptyList());
+                    new UsernamePasswordAuthenticationToken(USER_NAME_JWT, null, Collections.emptyList());
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authToken);
         }
